@@ -1,13 +1,13 @@
 <?php
-session_start(); 
+session_start();
 require '../../common/validation.php';
 require '../../common/database.php';
+$database_handler = getDatabaseConnection();
+
 
 $user_name = $_POST['user_name'];
 $user_email = $_POST['user_email'];
 $user_password = $_POST['user_password'];
-
-$database_handler = getDatabaseConnection();
 
 $_SESSION['errors'] = [];
 
@@ -35,6 +35,7 @@ if ($_SESSION['errors']) {
     header('Location: ../../user/');
     exit;
 }
+
 try {
     // インサートSQLを作成して実行
     if ($statement = $database_handler->prepare('INSERT INTO users (name, email, password) VALUES (:name, :email, :password)')) {
@@ -50,6 +51,16 @@ try {
     exit;
 }
 
+// 登録成功後に追加
+$_SESSION['user'] = [
+    'name' => $user_name,
+    'id' => $database_handler->lastInsertId()
+];
+
 // メモ投稿画面にリダイレクト
 header('Location: ../../memo/');
 exit;
+
+
+
+
